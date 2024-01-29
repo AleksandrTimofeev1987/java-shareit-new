@@ -2,15 +2,15 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import javax.validation.Valid;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 @Data
 @AllArgsConstructor
-@Valid
-public class ItemDto {
+public class ItemResponseDto {
+
+    private Long id;
     private String name;
     private String description;
     private Boolean available;
-    private Long request;
+    private ItemRequest request;
 }

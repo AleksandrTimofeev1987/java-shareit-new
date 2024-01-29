@@ -37,7 +37,7 @@ public interface UserService {
      * Method updates user.
      *
      * @param userId ID of user to be updated.
-     * @param userDto User to be updated.
+     * @param userDto Updated user.
      *
      * @return Updated user response DTO.
      */

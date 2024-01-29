@@ -32,6 +32,13 @@ public interface UserRepository {
     User save(User user);
 
     /**
+     * Method deleted certain user in repository.
+     *
+     * @param userId ID of user to be deleted.
+     */
+    void delete(Long userId);
+
+    /**
      * Method checks if repository already contain user with certain email and throw ConflictException if found.
      *
      * @param email Email to be checked.
@@ -39,9 +46,9 @@ public interface UserRepository {
     void checkEmailDuplication(String email);
 
     /**
-     * Method deleted certain user in repository.
+     * Method checks if repository contain user with certain ID.
      *
-     * @param userId ID of user to be deleted.
+     * @param userId User ID to be checked.
      */
-    void delete(Long userId);
+    void checkUserExists(Long userId);
 }

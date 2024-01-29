@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.model.ConflictException;
+import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
@@ -49,9 +50,18 @@ public class InMemoryUserRepository implements UserRepository {
                 .stream()
                 .map(User::getEmail)
                 .anyMatch(e -> e.equals(email))) {
-            final String message = String.format("Storage already contain user with email = %s.", email);
+            final String message = String.format("Storage already contain user with email - %s.", email);
             log.warn(message);
             throw new ConflictException(message);
+        }
+    }
+
+    @Override
+    public void checkUserExists(Long userId) {
+        if (findById(userId) == null) {
+            final String message = String.format("User with ID - %d is not found.", userId);
+            log.warn(message);
+            throw new NotFoundException(message);
         }
     }
 }

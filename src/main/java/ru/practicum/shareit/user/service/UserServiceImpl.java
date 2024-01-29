@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -23,7 +22,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto getUser(Long userId) {
         log.debug("Request to get user with ID - {} is received.", userId);
-        checkUserExists(userId);
+        userRepository.checkUserExists(userId);
 
         User userFromRepository = userRepository.findById(userId);
 
@@ -42,7 +41,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(User user) {
-        log.debug("Request to add user with name - {} is received.", user.getName());
+        log.debug("Request to add new user with name - {} is received.", user.getName());
 
         userRepository.checkEmailDuplication(user.getEmail());
 
@@ -57,7 +56,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto updateUser(Long userId, UserUpdateDto userDto) {
         log.debug("Request to update user with ID - {} is received.", userId);
 
-        checkUserExists(userId);
+        userRepository.checkUserExists(userId);
         userRepository.checkEmailDuplication(userDto.getEmail());
 
         User userForUpdate = userRepository.findById(userId);
@@ -74,16 +73,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long userId) {
         log.debug("Request to delete user with ID - {} is received.", userId);
-        checkUserExists(userId);
+        userRepository.checkUserExists(userId);
         userRepository.delete(userId);
         log.debug("User with ID - {} is deleted from repository.", userId);
-    }
-
-    private void checkUserExists(Long userId) {
-        if (userRepository.findById(userId) == null) {
-            final String message = String.format("User with id: %d is not found", userId);
-            log.warn(message);
-            throw new NotFoundException(message);
-        }
     }
 }
