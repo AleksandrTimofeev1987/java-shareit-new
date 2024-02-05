@@ -18,6 +18,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @GetMapping("/{userId}")
     private UserResponseDto getUser(@PathVariable Long userId) {
@@ -31,7 +32,7 @@ public class UserController {
 
     @PostMapping
     private UserResponseDto createUser(@Valid @RequestBody UserCreateDto userDto) {
-        User user = UserMapper.toUser(userDto);
+        User user = userMapper.toUser(userDto);
 
         return userService.createUser(user);
     }

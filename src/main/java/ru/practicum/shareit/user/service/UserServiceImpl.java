@@ -2,7 +2,12 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.model.ConflictException;
+import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -18,63 +23,85 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private static final String EMAIL_DUPLICATE_MESSAGE = "User email should be unique.";
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto getUser(Long userId) {
         log.debug("Request to get user with ID - {} is received.", userId);
-        userRepository.checkUserExists(userId);
 
-        User userFromRepository = userRepository.findById(userId);
+        User userFromRepository = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User with id: %d is not found", userId)));
 
         log.debug("User with ID - {} is received from repository.", userFromRepository.getId());
-        return UserMapper.toUserResponseDto(userFromRepository);
+        return userMapper.toUserResponseDto(userFromRepository);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponseDto> getAllUsers() {
         return userRepository
                 .findAll()
                 .stream()
-                .map(UserMapper::toUserResponseDto)
+                .map(userMapper::toUserResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public UserResponseDto createUser(User user) {
         log.debug("Request to add new user with name - {} is received.", user.getName());
 
-        userRepository.checkEmailDuplication(user.getEmail());
+        User savedUser;
 
-        User savedUser = userRepository.save(user);
+        try {
+            savedUser = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            log.warn(EMAIL_DUPLICATE_MESSAGE);
+            throw new ConflictException(EMAIL_DUPLICATE_MESSAGE);
+        }
 
         log.debug("User with ID - {} is added to repository.", savedUser.getId());
 
-        return UserMapper.toUserResponseDto(savedUser);
+        return userMapper.toUserResponseDto(savedUser);
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateUser(Long userId, UserUpdateDto userDto) {
         log.debug("Request to update user with ID - {} is received.", userId);
 
-        userRepository.checkUserExists(userId);
-        userRepository.checkEmailDuplication(userDto.getEmail());
+        User userForUpdate = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User with id: %d is not found", userId)));
 
-        User userForUpdate = userRepository.findById(userId);
+        userMapper.toUserFromUserUpdateDto(userDto, userForUpdate);
 
-        UserMapper.toUserFromUserUpdateDto(userDto, userForUpdate);
+        User updatedUser;
 
-        User updatedUser = userRepository.findById(userId);
+        try {
+            updatedUser = userRepository.save(userForUpdate);
+        } catch (DataIntegrityViolationException e) {
+            log.warn(EMAIL_DUPLICATE_MESSAGE);
+            throw new ConflictException(EMAIL_DUPLICATE_MESSAGE);
+        }
 
         log.debug("User with ID - {} is updated in repository.", updatedUser.getId());
 
-        return UserMapper.toUserResponseDto(updatedUser);
+        return userMapper.toUserResponseDto(updatedUser);
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         log.debug("Request to delete user with ID - {} is received.", userId);
-        userRepository.checkUserExists(userId);
-        userRepository.delete(userId);
+
+        try {
+            userRepository.deleteById(userId);
+        } catch (EmptyResultDataAccessException e) {
+            final String message = String.format("User with id: %d is not found", userId);
+            log.warn(message);
+            throw new NotFoundException(message);
+        }
+
         log.debug("User with ID - {} is deleted from repository.", userId);
     }
 }

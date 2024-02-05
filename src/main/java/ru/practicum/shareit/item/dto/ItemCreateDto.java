@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.request.model.ItemRequest;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -14,6 +13,7 @@ import javax.validation.constraints.Size;
 @Valid
 public class ItemCreateDto {
     @NotBlank(message = "{name.item.not_blank}")
+    @Size(max = 200, message = "{name.item.size}")
     private String name;
 
     @NotBlank(message = "{description.item.not_blank}")
@@ -22,6 +22,4 @@ public class ItemCreateDto {
 
     @NotNull(message = "{available.item.not_null}")
     private Boolean available;
-
-    private ItemRequest request;
 }

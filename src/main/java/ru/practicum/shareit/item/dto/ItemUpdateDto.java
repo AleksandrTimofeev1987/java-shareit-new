@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 @Valid
 public class ItemUpdateDto {
 
+    @Size(max = 200, message = "{name.item.size}")
     private String name;
 
     @Size(max = 200, message = "{description.item.size}")

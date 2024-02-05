@@ -18,6 +18,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final ItemMapper itemMapper;
     private static final String REQUEST_HEADER_USER_ID_TITLE = "X-Sharer-User-Id";
 
     @GetMapping()
@@ -33,9 +34,9 @@ public class ItemController {
     @PostMapping
     private ItemResponseDto createItem(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId,
                                        @Valid @RequestBody ItemCreateDto itemDto) {
-        Item item = ItemMapper.toItem(userId, itemDto);
+        Item item = itemMapper.toItem(itemDto);
 
-        return itemService.createItem(item);
+        return itemService.createItem(userId, item);
     }
 
     @PatchMapping("/{itemId}")

@@ -29,11 +29,12 @@ public interface ItemService {
     /**
      * Method creates new item.
      *
+     * @param userId ID of user adding item.
      * @param item Item to be added.
      *
      * @return Added item response DTO with assigned ID.
      */
-    ItemResponseDto createItem(Item item);
+    ItemResponseDto createItem(Long userId, Item item);
 
     /**
      * Method updates item.
