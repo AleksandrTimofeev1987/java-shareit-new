@@ -21,12 +21,6 @@ public class Booking {
     @Column(name = "booking_id", nullable = false, updatable = false, unique = true)
     private Long id;
 
-    @Column(name = "booking_start", nullable = false)
-    private LocalDateTime start;
-
-    @Column(name = "booking_end", nullable = false)
-    private LocalDateTime end;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
@@ -38,5 +32,11 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     @Column(name = "booking_status", length = 10, nullable = false)
     private BookingStatus status;
+
+    @Column(name = "booking_start", nullable = false)
+    private LocalDateTime start;
+
+    @Column(name = "booking_end", nullable = false)
+    private LocalDateTime end;
 
 }

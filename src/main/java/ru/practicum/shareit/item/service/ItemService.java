@@ -20,11 +20,12 @@ public interface ItemService {
     /**
      * Method gets item by ID.
      *
+     * @param userId ID of user requesting item.
      * @param itemId ID of item to be returned.
      *
      * @return Item with specific ID.
      */
-    ItemResponseDto getItem(Long itemId);
+    ItemResponseDto getItem(Long userId, Long itemId);
 
     /**
      * Method creates new item.

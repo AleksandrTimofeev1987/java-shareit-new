@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.model.ForbiddenException;
 import ru.practicum.shareit.exception.model.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
@@ -13,6 +16,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,9 +28,12 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     private final ItemMapper itemMapper;
+    private final BookingMapper bookingMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemResponseDto> getAllItemsByUserId(Long userId) {
         log.debug("Request to get all items owned by user with ID - {} is received.", userId);
 
@@ -39,17 +46,24 @@ public class ItemServiceImpl implements ItemService {
         return items
                 .stream()
                 .map(itemMapper::toItemResponseDto)
+                .map(item -> populateItemWithBookings(userId, item))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ItemResponseDto getItem(Long itemId) {
+    @Transactional(readOnly = true)
+    public ItemResponseDto getItem(Long userId, Long itemId) {
         log.debug("Request to get item with ID - {} is received.", itemId);
+
+        validateUserExists(userId);
 
         Item itemFromRepository = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(String.format("Item with id: %d is not found", itemId)));
 
         log.debug("Item with ID - {} is received from repository.", itemFromRepository.getId());
-        return itemMapper.toItemResponseDto(itemFromRepository);
+
+        ItemResponseDto itemDto = itemMapper.toItemResponseDto(itemFromRepository);
+
+        return populateItemWithBookings(userId, itemDto);
     }
 
     @Override
@@ -104,6 +118,22 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(itemMapper::toItemResponseDto)
                 .collect(Collectors.toList());
+    }
+
+
+    private ItemResponseDto populateItemWithBookings(Long userId, ItemResponseDto itemDto) {
+        if (userId.equals(itemDto.getOwner().getId())) {
+            LocalDateTime now = LocalDateTime.now();
+
+            final Long itemId = itemDto.getId();
+            Booking lastBooking = bookingRepository.findFirstByItemIdAndEndIsBeforeOrderByEndDesc(itemId, now);
+            Booking nextBooking = bookingRepository.findFirstByItemIdAndStartIsAfterOrderByStartAsc(itemId, now);
+
+            itemDto.setLastBooking(bookingMapper.toBookingShortDto(lastBooking));
+            itemDto.setNextBooking(bookingMapper.toBookingShortDto(nextBooking));
+        }
+
+        return itemDto;
     }
 
     private void validateUserExists(Long userId) {

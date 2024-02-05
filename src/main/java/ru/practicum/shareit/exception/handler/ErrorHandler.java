@@ -7,16 +7,22 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exception.model.ApiError;
-import ru.practicum.shareit.exception.model.ConflictException;
-import ru.practicum.shareit.exception.model.ForbiddenException;
-import ru.practicum.shareit.exception.model.NotFoundException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.shareit.exception.model.*;
 
 import java.time.LocalDateTime;
 
 @RestControllerAdvice("ru.practicum")
 @Slf4j
 public class ErrorHandler {
+
+    @ExceptionHandler
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleIllegalRequestState(final MethodArgumentTypeMismatchException e) {
+        final String message = "Unknown " + e.getName() + ": " + e.getValue();
+        log.warn(message);
+        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, "Request parameters are incorrect", message, LocalDateTime.now()));
+    }
 
     @ExceptionHandler
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -31,6 +37,13 @@ public class ErrorHandler {
     public ResponseEntity<Object> handleConflictException(final ConflictException e) {
         log.warn(e.getMessage());
         return buildResponseEntity(new ApiError(HttpStatus.CONFLICT, "Provided data contain conflicting data.", e.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleBadRequestException(final BadRequestException e) {
+        log.warn(e.getMessage());
+        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, "Body parameters are not valid.", e.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler

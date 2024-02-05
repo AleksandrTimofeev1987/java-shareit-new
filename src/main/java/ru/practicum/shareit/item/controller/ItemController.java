@@ -27,8 +27,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    private ItemResponseDto getItem(@PathVariable Long itemId) {
-        return itemService.getItem(itemId);
+    private ItemResponseDto getItem(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId,
+                                    @PathVariable Long itemId) {
+        return itemService.getItem(userId, itemId);
     }
 
     @PostMapping
