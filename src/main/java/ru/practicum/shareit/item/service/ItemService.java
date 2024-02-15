@@ -1,7 +1,9 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -57,4 +59,15 @@ public interface ItemService {
      * @return List of items which name or description contain text.
      */
     List<ItemResponseDto> search(Long userId, String text);
+
+    /**
+     * Method creates new comment to item.
+     *
+     * @param userId ID of user adding comment.
+     * @param itemId ID of item to be commented.
+     * @param comment Comment to be added.
+     *
+     * @return Added comment response DTO with assigned ID.
+     */
+    CommentResponseDto createComment(Long userId, Long itemId, Comment comment);
 }

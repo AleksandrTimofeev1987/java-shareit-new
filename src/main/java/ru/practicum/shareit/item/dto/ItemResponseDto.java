@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,4 +21,5 @@ public class ItemResponseDto {
     private UserResponseDto owner;
     private BookingShortDto lastBooking;
     private BookingShortDto nextBooking;
+    private Set<CommentResponseDto> comments = new HashSet<>();
 }
