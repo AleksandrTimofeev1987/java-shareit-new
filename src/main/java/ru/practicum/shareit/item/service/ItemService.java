@@ -14,10 +14,12 @@ public interface ItemService {
      * Method gets all items owned by user.
      *
      * @param userId ID of user requesting the information.
+     * @param from Index of first element in response.
+     * @param size Number elements to be shown.
      *
      * @return List of items owned by user.
      */
-    List<ItemResponseDto> getAllItemsByUserId(Long userId);
+    List<ItemResponseDto> getAllItemsByUserId(Long userId, Integer from, Integer size);
 
     /**
      * Method gets item by ID.
@@ -34,10 +36,11 @@ public interface ItemService {
      *
      * @param userId ID of user adding item.
      * @param item Item to be added.
+     * @param requestId ID of request the item is created in response to.
      *
      * @return Added item response DTO with assigned ID.
      */
-    ItemResponseDto createItem(Long userId, Item item);
+    ItemResponseDto createItem(Long userId, Item item, Long requestId);
 
     /**
      * Method updates item.
@@ -55,10 +58,12 @@ public interface ItemService {
      *
      * @param userId ID of user requesting the information.
      * @param text Search request.
+     * @param from Index of first element in response.
+     * @param size Number elements to be shown.
      *
      * @return List of items which name or description contain text.
      */
-    List<ItemResponseDto> search(Long userId, String text);
+    List<ItemResponseDto> search(Long userId, String text, Integer from, Integer size);
 
     /**
      * Method creates new comment to item.

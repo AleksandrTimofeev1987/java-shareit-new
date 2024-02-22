@@ -22,4 +22,6 @@ public class ItemCreateDto {
 
     @NotNull(message = "{available.item.not_null}")
     private Boolean available;
+
+    private Long requestId;
 }

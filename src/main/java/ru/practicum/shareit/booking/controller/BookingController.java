@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.RequestState;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.validator.BookingValidator;
+import ru.practicum.shareit.validation.PaginationValidator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -25,14 +26,22 @@ public class BookingController {
 
     @GetMapping
     private List<BookingResponseDto> getAllBookingsByBooker(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId,
-                                                            @RequestParam(required = false, defaultValue = "ALL") RequestState state) {
-        return bookingService.getAllBookingsByBooker(userId, state);
+                                                            @RequestParam(required = false, defaultValue = "ALL") RequestState state,
+                                                            @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                            @RequestParam(required = false, defaultValue = "10") Integer size) {
+        PaginationValidator.validatePaginationParameters(from, size);
+
+        return bookingService.getAllBookingsByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     private List<BookingResponseDto> getAllBookingsByOwner(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId,
-                                                           @RequestParam(required = false, defaultValue = "ALL") RequestState state) {
-        return bookingService.getAllBookingsByOwner(userId, state);
+                                                           @RequestParam(required = false, defaultValue = "ALL") RequestState state,
+                                                           @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                           @RequestParam(required = false, defaultValue = "10") Integer size) {
+        PaginationValidator.validatePaginationParameters(from, size);
+
+        return bookingService.getAllBookingsByOwner(userId, state, from, size);
     }
 
     @GetMapping("/{bookingId}")

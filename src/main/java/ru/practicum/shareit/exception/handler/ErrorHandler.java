@@ -43,7 +43,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleBadRequestException(final BadRequestException e) {
         log.warn(e.getMessage());
-        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, "Body parameters are not valid.", e.getMessage(), LocalDateTime.now()));
+        return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, "Parameters are not valid.", e.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler

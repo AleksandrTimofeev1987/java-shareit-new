@@ -6,6 +6,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemResponseForItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserResponseDto;
@@ -26,7 +27,27 @@ public interface ItemMapper {
         itemResponseDto.setDescription(item.getDescription());
         itemResponseDto.setOwner(userToUserResponseDto(item.getOwner()));
         itemResponseDto.setAvailable(item.getAvailable());
+        if (item.getRequest() != null) {
+            itemResponseDto.setRequestId(item.getRequest().getId());
+        }
 
+        return itemResponseDto;
+    }
+
+    default ItemResponseForItemRequestDto toItemResponseForItemRequestDto(Item item) {
+        if (item == null) {
+            return null;
+        }
+
+        ItemResponseForItemRequestDto itemResponseDto = new ItemResponseForItemRequestDto();
+
+        itemResponseDto.setId(item.getId());
+        itemResponseDto.setName(item.getName());
+        itemResponseDto.setDescription(item.getDescription());
+        itemResponseDto.setAvailable(item.getAvailable());
+        if (item.getRequest() != null) {
+            itemResponseDto.setRequestId(item.getRequest().getId());
+        }
 
         return itemResponseDto;
     }

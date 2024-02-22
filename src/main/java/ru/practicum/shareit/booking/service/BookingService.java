@@ -13,20 +13,24 @@ public interface BookingService {
      *
      * @param userId ID of user requesting bookings.
      * @param state Request state for selection.
+     * @param from Index of first element in response.
+     * @param size Number elements to be shown.
      *
      * @return List of booking response DTO's.
      */
-    List<BookingResponseDto> getAllBookingsByBooker(Long userId, RequestState state);
+    List<BookingResponseDto> getAllBookingsByBooker(Long userId, RequestState state, Integer from, Integer size);
 
     /**
      * Method return bookings made for user's items.
      *
      * @param userId ID of user requesting bookings.
      * @param state Request state for selection.
+     * @param from Index of first element in response.
+     * @param size Number elements to be shown.
      *
      * @return List of bookings response DTO's.
      */
-    List<BookingResponseDto> getAllBookingsByOwner(Long userId, RequestState state);
+    List<BookingResponseDto> getAllBookingsByOwner(Long userId, RequestState state, Integer from, Integer size);
 
     /**
      * Method return requested booking.

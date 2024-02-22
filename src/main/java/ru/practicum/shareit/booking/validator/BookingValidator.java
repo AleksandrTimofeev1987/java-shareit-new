@@ -40,6 +40,5 @@ public class BookingValidator {
             log.warn(message);
             throw new BadRequestException(message);
         }
-
     }
 }

@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.validation.PaginationValidator;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -23,8 +24,10 @@ public class ItemController {
     private static final String REQUEST_HEADER_USER_ID_TITLE = "X-Sharer-User-Id";
 
     @GetMapping()
-    private List<ItemResponseDto> getAllItemsByUserId(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId) {
-        return itemService.getAllItemsByUserId(userId);
+    private List<ItemResponseDto> getAllItemsByUserId(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId,
+                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                      @RequestParam(required = false, defaultValue = "10") Integer size) {
+        return itemService.getAllItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/{itemId}")
@@ -38,7 +41,7 @@ public class ItemController {
                                        @Valid @RequestBody ItemCreateDto itemDto) {
         Item item = itemMapper.toItem(itemDto);
 
-        return itemService.createItem(userId, item);
+        return itemService.createItem(userId, item, itemDto.getRequestId());
     }
 
     @PatchMapping("/{itemId}")
@@ -50,8 +53,12 @@ public class ItemController {
 
     @GetMapping("/search")
     private List<ItemResponseDto> search(@RequestHeader(REQUEST_HEADER_USER_ID_TITLE) Long userId,
-                                         @RequestParam String text) {
-        return itemService.search(userId, text);
+                                         @RequestParam String text,
+                                         @RequestParam(required = false, defaultValue = "0") Integer from,
+                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
+        PaginationValidator.validatePaginationParameters(from, size);
+
+        return itemService.search(userId, text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

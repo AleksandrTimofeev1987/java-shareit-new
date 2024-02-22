@@ -2,6 +2,9 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -19,6 +22,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -36,18 +40,22 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
     private final BookingMapper bookingMapper;
+    private static final Sort SORT_BY_ID = Sort.by(Sort.Direction.ASC, "id");
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> getAllItemsByUserId(Long userId) {
+    public List<ItemResponseDto> getAllItemsByUserId(Long userId, Integer from, Integer size) {
         log.debug("Request to get all items owned by user with ID - {} is received.", userId);
 
         validateUserExists(userId);
 
-        List<Item> items = itemRepository.findByOwnerIdOrderById(userId);
+        Pageable page = PageRequest.of(from / size, size, SORT_BY_ID);
+
+        List<Item> items = itemRepository.findByOwnerId(userId, page).getContent();
 
         log.debug("List of all items owned by user with ID - {} is received from repository.", userId);
 
@@ -76,10 +84,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemResponseDto createItem(Long userId, Item item) {
+    public ItemResponseDto createItem(Long userId, Item item, Long requestId) {
         log.debug("Request to add new item with name - {} is received from user with ID - {}.", item.getName(), userId);
 
         item.setOwner(userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User with id: %d is not found", userId))));
+
+        if (requestId != null) {
+            item.setRequest(itemRequestRepository.findById(requestId).orElseThrow(() -> new NotFoundException(String.format("Item request with id: %d is not found", requestId))));
+        }
 
         Item savedItem = itemRepository.save(item);
 
@@ -110,7 +122,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> search(Long userId, String text) {
+    public List<ItemResponseDto> search(Long userId, String text, Integer from, Integer size) {
         log.debug("Request to get all items which name or description contain text - '{}' is received from user with ID - {}.", text, userId);
 
         validateUserExists(userId);
@@ -119,7 +131,9 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
 
-        List<Item> searchResult = itemRepository.search(text);
+        Pageable page = PageRequest.of(from / size, size, SORT_BY_ID);
+
+        List<Item> searchResult = itemRepository.search(text, page).getContent();
 
         log.debug("List of all items which name or description contain text - '{}' is received from repository.", userId);
         return searchResult
